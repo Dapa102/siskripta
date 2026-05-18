@@ -86,4 +86,9 @@ class LatestAccessLogs extends BaseWidget
             ])
             ->paginated(false);
     }
+
+    public static function canView(): bool
+    {
+        return auth()->check() && auth()->user()->role === 'super_admin';
+    }
 }

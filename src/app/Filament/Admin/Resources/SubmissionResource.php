@@ -37,8 +37,10 @@ class SubmissionResource extends Resource
                     ->disabled(fn ($record) => auth()->user()->role === 'dosen'),
 
                 Forms\Components\FileUpload::make('file_pendukung')
+                    ->label('Upload File Proposal / Jurnal (Max. 10MB)') // <--- Tambahkan Baris Label di Sini
                     ->directory('submissions')
                     ->acceptedFileTypes(['application/pdf'])
+                    ->maxSize(10240) // Ini yang barusan kita bahas jika butuh limit 10MB
                     ->disabled(fn ($record) => auth()->user()->role === 'dosen'),
             ]);
     }
@@ -103,10 +105,17 @@ class SubmissionResource extends Resource
                             ->required(),
                     ])
                     ->action(function (Submission $record, array $data) {
-                        // Update status submission
+                        // 1. Catat Counter Jika Dosen Pilih Revisi/Tolak
+                        if ($data['status'] === 'revisi') {
+                            $record->increment('revisi_count');
+                        } elseif ($data['status'] === 'reject') {
+                            $record->increment('reject_count');
+                        }
+
+                        // 2. Update Status Pengajuan
                         $record->update(['status' => $data['status']]);
 
-                        // Simpan komentar
+                        // 3. Simpan Pesan/Komentar Dosen
                         $record->comments()->create([
                             'user_id' => auth()->id(),
                             'komentar' => $data['komentar']
@@ -116,6 +125,12 @@ class SubmissionResource extends Resource
                 Tables\Actions\EditAction::make()
                     ->visible(fn ($record) => auth()->user()->role === 'mahasiswa' && in_array($record->status, ['pending', 'revisi'])),
             ]);
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        // 100% memaksa Filament menghapus menu ini dari sidebar untuk Admin
+        return auth()->user()->role !== 'super_admin';
     }
 
     public static function getEloquentQuery(): Builder
@@ -165,5 +180,43 @@ class SubmissionResource extends Resource
         return [
              CommentsRelationManager::class,
         ];
+    }
+
+    // IZIN MELIHAT DETAIL (VIEW)
+    public static function canView(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        $user = auth()->user();
+        if ($user->role === 'super_admin') return true;
+        
+        // Cek: Apakah ini pengajuannya si mahasiswa ini sendiri?
+        if ($user->role === 'mahasiswa') return $record->mahasiswa_id === $user->id;
+        
+        // Cek: Apakah ini bimbingannya si dosen ini?
+        if ($user->role === 'dosen') {
+            $bimbingan = \App\Models\Bimbingan::where('dosen_id', $user->id)
+                            ->where('mahasiswa_id', $record->mahasiswa_id)
+                            ->exists();
+            return $bimbingan;
+        }
+
+        return false;
+    }
+
+    // IZIN MENGUBAH / REVISI / EDIT
+    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        $user = auth()->user();
+        // HANYA mahasiswa sendiri yang boleh nge-edit dan itupun hanya saat statusnya Pending, Revisi, atau Reject. (Dosen sama sekali tidak boleh ngedit isi tulisan mhs)
+        if ($user->role === 'mahasiswa' && $record->mahasiswa_id === $user->id) {
+            return in_array($record->status, ['pending', 'revisi', 'reject']);
+        }
+        
+        return false;
+    }
+
+    // IZIN MENGHAPUS (Hanya Admin yang boleh hapus mutlak)
+    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return auth()->user()->role === 'super_admin';
     }
 }

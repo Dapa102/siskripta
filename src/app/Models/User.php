@@ -70,7 +70,22 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return in_array($this->role, ['super_admin', 'dosen', 'mahasiswa']);
+        // 1. Jika panelnya 'admin', HANYA Super Admin yang boleh akses
+        if ($panel->getId() === 'admin') {
+            return $this->role === 'super_admin';
+        }
+
+        // 2. Jika panelnya 'dosen', HANYA Dosen yang boleh akses
+        if ($panel->getId() === 'dosen') {
+            return $this->role === 'dosen';
+        }
+
+        // 3. Jika panelnya 'mahasiswa', HANYA Mahasiswa yang boleh akses
+        if ($panel->getId() === 'mahasiswa') {
+            return $this->role === 'mahasiswa';
+        }
+
+        return false; // Default: tolak akses ke panel-panel lain yang tidak dikenal
     }
 
     public function bimbinganDosen() {
@@ -83,5 +98,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function submissions() {
         return $this->hasMany(Submission::class, 'mahasiswa_id');
+    }
+
+    public function logbooks()
+    {
+        return $this->hasMany(Logbook::class, 'mahasiswa_id');
     }
 }
