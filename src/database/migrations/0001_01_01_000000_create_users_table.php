@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('role', ['super_admin', 'dosen', 'mahasiswa'])->default('mahasiswa');
+            $table->string('nidn_nim')->nullable(); // Untuk NIDN Dosen atau NIM Mahasiswa
             $table->rememberToken();
             $table->timestamps();
         });

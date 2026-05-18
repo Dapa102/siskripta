@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('submissions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('mahasiswa_id')->constrained('users')->cascadeOnDelete();
+            $table->string('judul');
+            $table->text('deskripsi');
+            $table->string('file_pendukung')->nullable();
+            $table->enum('status', ['pending', 'acc', 'reject', 'revisi'])->default('pending');
+            $table->boolean('is_seen_by_dosen')->default(false);
+            $table->integer('revisi_count')->default(0);
             $table->timestamps();
         });
     }

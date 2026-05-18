@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('bimbingans', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('dosen_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('mahasiswa_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
         });
     }

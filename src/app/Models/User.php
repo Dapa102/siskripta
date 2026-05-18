@@ -22,10 +22,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
      * @var list<string>
      */
     protected $fillable = [
-        'avatar_url',
-        'name',
-        'email',
-        'password',
+        'name', 
+        'email', 
+        'password', 
+        'role', 
+        'nidn_nim',
     ];
 
     /**
@@ -64,6 +65,18 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return true;
+        return in_array($this->role, ['super_admin', 'dosen', 'mahasiswa']);
+    }
+
+    public function bimbinganDosen() {
+        return $this->hasMany(Bimbingan::class, 'dosen_id');
+    }
+
+    public function bimbinganMahasiswa() {
+        return $this->hasOne(Bimbingan::class, 'mahasiswa_id');
+    }
+
+    public function submissions() {
+        return $this->hasMany(Submission::class, 'mahasiswa_id');
     }
 }
