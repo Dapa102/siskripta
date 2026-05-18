@@ -94,10 +94,28 @@ class SidangResource extends Resource
                     }),
             ])
             ->actions([
+                // 1. Tombol Edit (Hanya muncul jika status masih menunggu)
                 Tables\Actions\EditAction::make()
                     ->label('Lihat Detail / Edit')
-                    // Hanya bisa mengedit selagi statusnya masih 'Menunggu'
                     ->visible(fn (Sidang $record) => $record->status_kelulusan === 'menunggu'),
+
+                // 2. Tombol Cetak PDF (Hanya muncul jika sudah lulus)
+                Tables\Actions\Action::make('cetak_pdf')
+                    ->label('Cetak Pengesahan')
+                    ->color('success')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->visible(fn ($record) => $record->status_kelulusan === 'lulus')
+                    ->action(function ($record) {
+                        return response()->streamDownload(function () use ($record) {
+                            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.lembar-pengesahan', ['record' => $record]);
+                            echo $pdf->output();
+                        }, 'Lembar-Pengesahan-' . ($record->submission->mahasiswa->name ?? 'Mahasiswa') . '.pdf');
+                    }),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
             ]);
     }
 
