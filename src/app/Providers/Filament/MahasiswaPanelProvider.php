@@ -54,8 +54,11 @@ class MahasiswaPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('3s') // Mengecek notif baru setiap 3 detik agar terasa Real-Time
             ->authMiddleware([
                 Authenticate::class,
             ]);
+            
     }
 }

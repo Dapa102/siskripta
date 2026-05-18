@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources; // Sesuaikan namespace jika foldernya berbeda (misal: App\Filament\Resources)
 
+use Filament\Notifications\Notification;
 use App\Filament\Admin\Resources\SubmissionResource\RelationManagers\CommentsRelationManager;
 use App\Filament\Admin\Resources\SubmissionResource\Pages;
 use App\Models\Submission;
@@ -120,6 +121,31 @@ class SubmissionResource extends Resource
                             'user_id' => auth()->id(),
                             'komentar' => $data['komentar']
                         ]);
+
+                        // --- TAMBAHKAN KODE NOTIFIKASI DI BAWAH INI: ---
+                        $title = match ($data['status']) {
+                            'acc' => '🎉 Selamat! Pengajuan Anda di-ACC',
+                            'revisi' => '⚠️ Pengajuan Butuh Revisi',
+                            'reject' => '❌ Maaf, Pengajuan Ditolak',
+                            default => 'Info Pengajuan',
+                        };
+
+                        Notification::make()
+                            ->title($title)
+                            ->body('Dosen pembimbing telah memberikan review & komentar baru pada pengajuan Anda.')
+                            ->icon(match ($data['status']) {
+                                'acc' => 'heroicon-o-check-circle',
+                                'revisi' => 'heroicon-o-exclamation-triangle',
+                                'reject' => 'heroicon-o-x-circle',
+                                default => 'heroicon-o-information-circle',
+                            })
+                            ->iconColor(match ($data['status']) {
+                                'acc' => 'success',
+                                'revisi' => 'warning',
+                                'reject' => 'danger',
+                                default => 'gray',
+                            })
+                            ->sendToDatabase($record->mahasiswa);
                     }),
 
                 Tables\Actions\EditAction::make()

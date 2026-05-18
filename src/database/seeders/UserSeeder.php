@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
         Role::firstOrCreate(['name' => 'mahasiswa']);
 
         // 1. Buat Super Admin
-        $admin = User::firstOrCreate(
+        $admin = User::updateOrCreate(
             ['email' => 'admin@admin.com'],
             [
                 'name' => 'Super Admin', 
@@ -29,7 +29,7 @@ class UserSeeder extends Seeder
         $admin->assignRole('super_admin');
 
         // 2. Buat Dosen
-        $dosen = User::firstOrCreate(
+        $dosen = User::updateOrCreate(
             ['email' => 'dosen@test.com'],
             [
                 'name' => 'Dosen',
@@ -41,7 +41,7 @@ class UserSeeder extends Seeder
         $dosen->assignRole('dosen'); // Sekarang ini aman
 
         // 3. Buat Mahasiswa
-        $mahasiswa = User::firstOrCreate(
+        $mahasiswa = User::updateOrCreate(
             ['email' => 'mahasiswa@test.com'],
             [
                 'name' => 'Mahasiswa',
