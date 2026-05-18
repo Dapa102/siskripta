@@ -4,7 +4,7 @@ namespace App\Filament\Admin\Resources;
 
 use Filament\Notifications\Notification;
 use App\Filament\Admin\Resources\SubmissionResource\RelationManagers\CommentsRelationManager;
-use App\Filament\Admin\Resources\SubmissionResource\Pages;
+use App\Filament\Admin\Resources\TugasAkhirResource\Pages;
 use App\Models\Submission;
 use App\Models\Bimbingan;
 use Filament\Forms;
@@ -14,25 +14,25 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class SubmissionResource extends Resource
+class TugasAkhirResource extends Resource
 {
     protected static ?string $model = Submission::class;
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    protected static ?string $navigationLabel = 'Pengajuan Skripsi';
-    protected static ?string $pluralModelLabel = 'Pengajuan Skripsi';
+    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+    protected static ?string $navigationLabel = 'Pengajuan Tugas Akhir';
+    protected static ?string $pluralModelLabel = 'Pengajuan Tugas Akhir';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\Hidden::make('mahasiswa_id')->default(fn() => auth()->id()),
-                Forms\Components\Hidden::make('jenis_pengajuan')->default('skripsi'), // <-- Otomatis Skripsi
+                Forms\Components\Hidden::make('jenis_pengajuan')->default('tugas_akhir'), // <-- Otomatis TA
                 
                 Forms\Components\TextInput::make('judul')->required()->maxLength(255)->disabled(fn ($record) => auth()->user()->role === 'dosen'),
                 Forms\Components\Textarea::make('deskripsi')->required()->columnSpanFull()->disabled(fn ($record) => auth()->user()->role === 'dosen'),
                 Forms\Components\FileUpload::make('file_pendukung')
-                    ->label('Upload File Proposal / Jurnal (Max. 10MB)')
-                    ->directory('submissions')
+                    ->label('Upload File Proposal / Dokumen (Max. 10MB)')
+                    ->directory('tugas_akhir')
                     ->acceptedFileTypes(['application/pdf'])
                     ->maxSize(10240)
                     ->disabled(fn ($record) => auth()->user()->role === 'dosen')
@@ -73,8 +73,8 @@ class SubmissionResource extends Resource
                         elseif ($data['status'] === 'reject') $record->increment('reject_count');
                         $record->update(['status' => $data['status']]);
                         $record->comments()->create(['user_id' => auth()->id(), 'komentar' => $data['komentar']]);
-                        $title = match ($data['status']) { 'acc' => '🎉 Selamat! Pengajuan Anda di-ACC', 'revisi' => '⚠️ Pengajuan Butuh Revisi', 'reject' => '❌ Maaf, Pengajuan Ditolak', default => 'Info Pengajuan' };
-                        Notification::make()->title($title)->body('Dosen pembimbing telah memberikan review & komentar baru pada pengajuan Skripsi Anda.')->icon('heroicon-o-information-circle')->iconColor('warning')->sendToDatabase($record->mahasiswa);
+                        $title = match ($data['status']) { 'acc' => '🎉 Selamat! Pengajuan TA Anda di-ACC', 'revisi' => '⚠️ Pengajuan TA Butuh Revisi', 'reject' => '❌ Maaf, Pengajuan TA Ditolak', default => 'Info TA' };
+                        Notification::make()->title($title)->body('Dosen pembimbing telah memberikan review.')->icon('heroicon-o-information-circle')->iconColor('warning')->sendToDatabase($record->mahasiswa);
                     }),
                 Tables\Actions\EditAction::make()->visible(fn ($record) => auth()->user()->role === 'mahasiswa' && in_array($record->status, ['pending', 'revisi'])),
             ]);
@@ -85,8 +85,8 @@ class SubmissionResource extends Resource
         $query = parent::getEloquentQuery();
         $user = auth()->user();
 
-        // WAJIB: Hanya Skripsi!
-        $query->where('jenis_pengajuan', 'skripsi');
+        // WAJIB: Hanya TA!
+        $query->where('jenis_pengajuan', 'tugas_akhir');
 
         if ($user->role === 'dosen') {
             $mahasiswaIds = Bimbingan::where('dosen_id', $user->id)->pluck('mahasiswa_id');
@@ -116,5 +116,5 @@ class SubmissionResource extends Resource
     }
 
     public static function getRelations(): array { return [CommentsRelationManager::class]; }
-    public static function getPages(): array { return [ 'index' => Pages\ListSubmissions::route('/'), 'create' => Pages\CreateSubmission::route('/create'), 'view' => Pages\ViewSubmission::route('/{record}'), 'edit' => Pages\EditSubmission::route('/{record}/edit'), ]; }
+    public static function getPages(): array { return [ 'index' => Pages\ListTugasAkhirs::route('/'), 'create' => Pages\CreateTugasAkhir::route('/create'), 'edit' => Pages\EditTugasAkhir::route('/{record}/edit'), ]; }
 }

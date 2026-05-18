@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Submission extends Model
 {
     protected $guarded = [];
-
+    
     public function mahasiswa() {
         return $this->belongsTo(User::class, 'mahasiswa_id');
     }

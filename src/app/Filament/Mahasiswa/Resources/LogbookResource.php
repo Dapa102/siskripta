@@ -14,12 +14,11 @@ use Illuminate\Database\Eloquent\Builder;
 class LogbookResource extends Resource
 {
     protected static ?string $model = Logbook::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
-    protected static ?string $navigationLabel = 'Riwayat Bimbingan';
+    protected static ?string $navigationLabel = 'Logbook Bimbingan';
     protected static ?string $pluralModelLabel = 'Logbook';
 
-    // Membatasi data HANYA untuk login Mahasiswa itu sendiri (agar tidak bisa lihat logbook teman)
+    // Membatasi data HANYA untuk login Mahasiswa itu sendiri
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->where('mahasiswa_id', auth()->id());
@@ -50,14 +49,13 @@ class LogbookResource extends Resource
                     ->columnSpanFull(),
                     
                 Forms\Components\FileUpload::make('file_progress')
-                    ->label('Lampiran Dokumen (PDF/Word/ZIP) Max. 10MB')
+                    ->label('Lampiran Dokumen (PDF/Word/ZIP)')
                     ->directory('logbooks')
                     ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/zip'])
-                    ->maxSize(10240) // Maks 10MB
+                    ->maxSize(10240) 
                     ->columnSpanFull(),
 
-                // Bagian Feedback dari Dosen (Hanya bisa dilihat, tidak bisa diubah oleh mahasiswa)
-                Forms\Components\Fieldset::make('Feedback dari Dosen')
+                Forms\Components\Fieldset::make('Review & Feedback Dosen (Isi Bagian Ini)')
                     ->schema([
                         Forms\Components\Select::make('status')
                             ->options([
@@ -65,16 +63,14 @@ class LogbookResource extends Resource
                                 'revisi' => 'Ada Revisi',
                                 'disetujui' => 'Disetujui',
                             ])
-                            ->default('pending')
-                            ->disabled() // <-- Supaya Mahasiswa nggak bisa curang acc diri sendiri
                             ->required(),
 
                         Forms\Components\Textarea::make('catatan_dosen')
                             ->label('Catatan dari Dosen Pembimbing')
-                            ->disabled()
+                            ->required()
                             ->columnSpanFull(),
                     ])
-                    ->visible(fn (?Logbook $record) => $record !== null), // Muncul hanya saat ngedit/view (bukan saat awal buat laporan)
+                    ->visible(fn (?Logbook $record) => $record !== null),
             ]);
     }
 
@@ -90,37 +86,25 @@ class LogbookResource extends Resource
                     ->limit(30)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->label('Status')
                     ->badge()
-                    ->colors([
-                        'warning' => 'pending',
-                        'danger' => 'revisi',
-                        'success' => 'disetujui',
-                    ]),
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending' => 'warning',
+                        'revisi' => 'danger',
+                        'disetujui' => 'success',
+                        default => 'gray',
+                    }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Tanggal Lapor')
                     ->dateTime('d M Y')
                     ->sortable(),
-            ])
-            ->filters([
-                //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

@@ -33,10 +33,10 @@ class MahasiswaProgressWidget extends BaseWidget
                         'primary' => 'revisi',
                     ]),
                 Tables\Columns\TextColumn::make('revisi_count')
-                    ->label('Direvisi (x)')
+                    ->label('Direvisi')
                     ->alignCenter(),
                 Tables\Columns\TextColumn::make('reject_count')
-                    ->label('Ditolak (x)')
+                    ->label('Ditolak')
                     ->alignCenter(),
                 Tables\Columns\IconColumn::make('is_seen_by_dosen')
                     ->label('Dibaca Dosen')

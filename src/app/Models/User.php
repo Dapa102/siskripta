@@ -104,4 +104,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     {
         return $this->hasMany(Logbook::class, 'mahasiswa_id');
     }
+
+    public function sidangs()
+    {
+        return $this->hasMany(Sidang::class, 'mahasiswa_id');
+    }
 }

@@ -33,6 +33,7 @@ class DosenPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Dosen/Resources'), for: 'App\\Filament\\Dosen\\Resources')
             ->resources([
                 \App\Filament\Admin\Resources\SubmissionResource::class,
+                \App\Filament\Admin\Resources\TugasAkhirResource::class, 
                 \App\Filament\Admin\Resources\BimbinganResource::class,
             ])
             ->discoverPages(in: app_path('Filament/Dosen/Pages'), for: 'App\\Filament\\Dosen\\Pages')

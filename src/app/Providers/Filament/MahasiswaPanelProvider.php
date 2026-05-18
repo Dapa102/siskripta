@@ -33,6 +33,8 @@ class MahasiswaPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Mahasiswa/Resources'), for: 'App\\Filament\\Mahasiswa\\Resources')
             ->resources([
                 \App\Filament\Admin\Resources\SubmissionResource::class,
+                \App\Filament\Admin\Resources\TugasAkhirResource::class,
+                \App\Filament\Admin\Resources\BimbinganResource::class,
             ])
             ->discoverPages(in: app_path('Filament/Mahasiswa/Pages'), for: 'App\\Filament\\Mahasiswa\\Pages')
             ->pages([
