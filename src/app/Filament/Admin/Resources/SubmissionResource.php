@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources; // Sesuaikan namespace jika foldernya berbeda (misal: App\Filament\Resources)
 
+use App\Filament\Admin\Resources\SubmissionResource\RelationManagers\CommentsRelationManager;
 use App\Filament\Admin\Resources\SubmissionResource\Pages;
 use App\Models\Submission;
 use App\Models\Bimbingan;
@@ -142,7 +143,27 @@ class SubmissionResource extends Resource
         return [
             'index' => Pages\ListSubmissions::route('/'),
             'create' => Pages\CreateSubmission::route('/create'),
+            'view' => Pages\ViewSubmission::route('/{record}'),
             'edit' => Pages\EditSubmission::route('/{record}/edit'),
+        ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        // Hanya yang return true (dosen/mahasiswa) yang bisa lihat menunya di sidebar
+        return auth()->user()->role !== 'super_admin';
+    }
+
+    public static function canCreate(): bool
+    {
+        // HANYA Mahasiswa yang boleh membuat pengajuan baru
+        return auth()->user()->role === 'mahasiswa';
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+             CommentsRelationManager::class,
         ];
     }
 }

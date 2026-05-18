@@ -27,6 +27,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'password', 
         'role', 
         'nidn_nim',
+        'bidang_keahlian',
+        'avatar_url',
+        'is_active',
+        'nonactive_reason',
     ];
 
     /**
@@ -49,6 +53,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 

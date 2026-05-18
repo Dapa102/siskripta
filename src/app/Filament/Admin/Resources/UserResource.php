@@ -53,6 +53,11 @@ class UserResource extends Resource
                     ->maxLength(255)
                     // HANYA muncul jika role yang dipilih adalah Dosen atau Mahasiswa
                     ->visible(fn (\Filament\Forms\Get $get) => in_array($get('role'), ['dosen', 'mahasiswa'])),
+                
+                Forms\Components\TextInput::make('bidang_keahlian')
+                    ->label('Bidang Keahlian')
+                    ->maxLength(255)
+                    ->visible(fn (\Filament\Forms\Get $get) => $get('role') === 'dosen'),
 
                 Forms\Components\TextInput::make('password')
                     ->password()
@@ -61,6 +66,19 @@ class UserResource extends Resource
                     ->required(fn (string $context): bool => $context === 'create')
                     ->label('Password (Isi jika ingin ubah)')
                     ->visible(fn (\Filament\Forms\Get $get) => $get('role') !== null),
+                
+                 Forms\Components\Toggle::make('is_active')
+                    ->label('Status Aktif')
+                    ->default(true)
+                    ->live()
+                    ->visible(fn (\Filament\Forms\Get $get) => $get('role') !== 'super_admin'), // (Opsional) Biarkan admin selalu aktif
+                
+                Forms\Components\Textarea::make('nonactive_reason')
+                    ->label('Alasan Penonaktifan')
+                    ->placeholder('Misal: Anda belum melunasi UKT semester ini.')
+                    // WAJIB ISI (dan muncul) HANYA JIKA is_active dimatikan (false)
+                    ->required(fn (\Filament\Forms\Get $get) => $get('is_active') === false)
+                    ->visible(fn (\Filament\Forms\Get $get) => $get('is_active') === false),
             ]);
     }
 
@@ -71,17 +89,36 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama')
                     ->searchable(),
+
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
+
                 Tables\Columns\TextColumn::make('nidn_nim')
                     ->label('NIDN / NIM')
                     ->searchable(),
+                
+                Tables\Columns\TextColumn::make('bidang_keahlian')
+                    ->label('Keahlian')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
+                Tables\Columns\TextColumn::make('mahasiswa.bimbinganMahasiswa.dosen.name')
+                    ->label('Dosen Pembimbing')
+                    ->searchable()
+                    ->visible(auth()->user()->role === 'super_admin'),
+                
                 Tables\Columns\BadgeColumn::make('role')
                     ->colors([
                         'danger' => 'super_admin',
                         'success' => 'dosen',
                         'primary' => 'mahasiswa',
                     ]),
+                
+                Tables\Columns\IconColumn::make('is_active')
+                    ->label('Aktif')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('role')

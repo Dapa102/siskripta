@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\BimbinganResource\Pages;
 use App\Filament\Admin\Resources\BimbinganResource\RelationManagers;
 use App\Models\Bimbingan;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -83,5 +84,21 @@ class BimbinganResource extends Resource
             'create' => Pages\CreateBimbingan::route('/create'),
             'edit' => Pages\EditBimbingan::route('/{record}/edit'),
         ];
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()->role === 'super_admin';
+    }
+
+    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return auth()->user()->role === 'super_admin';
+    }
+
+    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return auth()->user()->role === 'super_admin';
+
     }
 }

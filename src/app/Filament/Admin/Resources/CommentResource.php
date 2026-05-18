@@ -53,6 +53,11 @@ class CommentResource extends Resource
         ];
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false; // Sembunyikan total menu Comments dari semua rute navigasi
+    }
+
     public static function getPages(): array
     {
         return [
