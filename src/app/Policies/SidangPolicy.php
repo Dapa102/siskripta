@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Submission;
+use App\Models\Sidang;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class SubmissionPolicy
+class SidangPolicy
 {
     use HandlesAuthorization;
 
@@ -15,15 +15,15 @@ class SubmissionPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_tugas::akhir');
+        return $user->can('view_any_sidang');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Submission $submission): bool
+    public function view(User $user, Sidang $sidang): bool
     {
-        return $user->can('view_tugas::akhir');
+        return $user->can('view_sidang');
     }
 
     /**
@@ -31,23 +31,23 @@ class SubmissionPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_tugas::akhir');
+        return $user->can('create_sidang');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Submission $submission): bool
+    public function update(User $user, Sidang $sidang): bool
     {
-        return $user->can('update_tugas::akhir');
+        return $user->can('update_sidang');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Submission $submission): bool
+    public function delete(User $user, Sidang $sidang): bool
     {
-        return $user->can('delete_tugas::akhir');
+        return $user->can('delete_sidang');
     }
 
     /**
@@ -55,13 +55,13 @@ class SubmissionPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_tugas::akhir');
+        return $user->can('delete_any_sidang');
     }
 
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(User $user, Submission $submission): bool
+    public function forceDelete(User $user, Sidang $sidang): bool
     {
         return $user->can('{{ ForceDelete }}');
     }
@@ -77,7 +77,7 @@ class SubmissionPolicy
     /**
      * Determine whether the user can restore.
      */
-    public function restore(User $user, Submission $submission): bool
+    public function restore(User $user, Sidang $sidang): bool
     {
         return $user->can('{{ Restore }}');
     }
@@ -93,7 +93,7 @@ class SubmissionPolicy
     /**
      * Determine whether the user can replicate.
      */
-    public function replicate(User $user, Submission $submission): bool
+    public function replicate(User $user, Sidang $sidang): bool
     {
         return $user->can('{{ Replicate }}');
     }
