@@ -2,6 +2,9 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Mahasiswa\Pages\Auth\CustomLogin;
+use Filament\Pages\Auth\Register as FilamentRegister;
+use App\Filament\Mahasiswa\Pages\Auth\RegisterMahasiswa;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -10,6 +13,8 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\FilamentUsers\FilamentUsersPlugin;
+use DiogoGPinto\AuthUIEnhancer\AuthUIEnhancerPlugin;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -25,10 +30,21 @@ class MahasiswaPanelProvider extends PanelProvider
         return $panel
             ->id('mahasiswa')
             ->path('mahasiswa')
-            ->login()
+            ->login(CustomLogin::class) // Kita buat Custom Login Class
+            ->registration(RegisterMahasiswa::class) // Kita buat Custom Registration Class
+            ->profile() // Mengaktifkan menu profil secara otomatis di Sidebar Filament
             ->passwordReset()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Blue,
+            ])
+            ->font('Inter') // Menyamakan dengan font welcome page
+            ->plugins([
+                AuthUIEnhancerPlugin::make()
+                    ->showEmptyPanelOnMobile(false)
+                    ->formPanelPosition('right')
+                    ->formPanelWidth('40%')
+                    ->emptyPanelBackgroundImageOpacity('80%')
+                    ->emptyPanelBackgroundImageUrl('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2670&auto=format&fit=crop')
             ])
             ->discoverResources(in: app_path('Filament/Mahasiswa/Resources'), for: 'App\\Filament\\Mahasiswa\\Resources')
             ->resources([
@@ -61,6 +77,6 @@ class MahasiswaPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
-            
+
     }
 }

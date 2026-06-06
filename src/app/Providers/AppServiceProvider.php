@@ -2,17 +2,10 @@
 
 namespace App\Providers;
 
-use App\Policies\ActivityPolicy;
-use Filament\Actions\MountableAction;
-use Filament\Notifications\Livewire\Notifications;
-use Filament\Notifications\Notification;
-use Filament\Pages\Page;
-use Filament\Support\Enums\Alignment;
-use Filament\Support\Enums\VerticalAlignment;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Validation\ValidationException;
-use Spatie\Activitylog\Models\Activity;
+use Illuminate\Support\Facades\URL;
+// Tambahkan Use untuk Filament Logout Contracts
+use Filament\Http\Responses\Auth\Contracts\LogoutResponse as LogoutResponseContract;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,7 +14,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Daftarkan Custom Logout Response kita agar menimpa bawaan Filament
+        $this->app->bind(LogoutResponseContract::class, \App\Http\Responses\LogoutResponse::class);
     }
 
     /**
@@ -29,25 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Bypass polisi keamanan untuk Super Admin dari sistem Spatie
-        Gate::before(function ($user, $ability) {
-            return $user->role === 'super_admin' ? true : null;
-        });
-
-        Gate::policy(Activity::class, ActivityPolicy::class);
-        Page::formActionsAlignment(Alignment::Right);
-        Notifications::alignment(Alignment::End);
-        Notifications::verticalAlignment(VerticalAlignment::End);
-        
-        Page::$reportValidationErrorUsing = function (ValidationException $exception) {
-            Notification::make()
-                ->title($exception->getMessage())
-                ->danger()
-                ->send();
-        };
-        
-        MountableAction::configureUsing(function (MountableAction $action) {
-            $action->modalFooterActionsAlignment(Alignment::Right);
-        });
+        if (config('app.env') !== 'local') {
+            URL::forceScheme('https');
+        }
     }
 }
